@@ -1,8 +1,9 @@
-#include <iostream>
+#include<stack>
 #include <string>
 #include <vector>
-#include<stack>
+#include <iostream>
 #include <sstream>  
+#include <exception>  
 using namespace std;
 
 /*获取用户字符串并进行截取获得string数组*/
@@ -14,23 +15,61 @@ vector<string> getStrList(char * str)
 	ch = str[num];
 	string temp = "";
 
+
+	if (ch == '-')
+	{
+		temp = temp + ch;
+		ch = str[++num];
+
+	}
+
 	while (ch != '\0')
 	{
-
+		
 		if (ch >= '0'&&ch <= '9')//数字
 		{
 			temp += ch;
 			ch = str[++num];
 		}
-		else                //运算符
+		else if (ch == '-')  //判断'-'是运算符还是负号
+		{
+			if (str[--num] == '(') //负号
+			{
+				temp += ch;
+				num++;
+				ch = str[++num];
+				
+			}
+			else                   //减号
+			{
+				num++;
+				string s_ch;   //将运算符转化为string类型（char—>string）
+				stringstream stream;
+				stream << ch;
+				s_ch = stream.str();
+
+				if (temp != "")
+				{
+					list.push_back(temp); //先把之前操作的数入结果集
+				}
+				list.push_back(s_ch);
+				temp = "";
+				ch = str[++num];
+
+			}
+		}
+		else                //其他运算符
 		{
 			string s_ch;   //将运算符转化为string类型（char—>string）
 			stringstream stream;
 			stream << ch;
 			s_ch = stream.str();
 
-			list.push_back(temp);
-			list.push_back(s_ch);
+			if (temp != "")        // 先把之前操作的数入结果集
+			{
+				list.push_back(temp); 
+			}			
+			list.push_back(s_ch); //把这个操作符入结果集
 			temp = "";
 			ch = str[++num];
 
@@ -142,7 +181,7 @@ double getResult(vector<string> & data)
 	for (int i = 0; i < data.size(); i++)
 	{
 		if (isNum(data[i]))        //数字,转化为实际double入操作栈
-		{			
+		{
 			operate.push(atof(data[i].c_str()));
 		}
 		else if (data[i] == "+")
